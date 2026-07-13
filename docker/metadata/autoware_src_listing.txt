@@ -1,0 +1,5 @@
+total 12
+drwxrwxr-x  3 1000 zed  4096 Jun 17 20:39 .
+drwxrwxr-x  5 1000 zed  4096 Jun 17 20:40 ..
+lrwxrwxrwx  1 root root   49 Jun 17 20:39 CMakeLists.txt -> /opt/ros/noetic/share/catkin/cmake/toplevel.cmake
+drwxrwxr-x 13 1000 zed  4096 Jun 17 20:35 autoware_ai_messages

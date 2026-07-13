@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Go1 density social navigation with ZED2i perception, Jetson AGX Xavier, ROS Noetic, and Unitree high-level commands.">
+    <title>Go1 Density Social Navigation</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="index.html">Go1 Density Social Navigation</a>
+        <a class="topbar-action" href="https://github.com/sriram-2502/go1_density_social_nav">GitHub</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <p class="eyebrow">Unitree Go1 · ZED2i · Jetson AGX Xavier · ROS Noetic</p>
+        <h1>GO1 DENSITY SOCIAL NAVIGATION</h1>
+        <p class="subtitle">
+          A hardware implementation of density-field obstacle avoidance for a
+          Unitree Go1 navigating around moving pedestrians using onboard stereo
+          perception and high-level velocity commands.
+        </p>
+        <div class="authors">
+          <span>Sriram S. K. S Narayanan</span>
+          <span>Clemson University</span>
+        </div>
+        <nav class="actions" aria-label="Project sections">
+          <a href="#system">System</a>
+          <a href="#experiments">Experiments</a>
+          <a href="#reproduce">Reproduce</a>
+          <a href="setup_jetson_agx.md">Jetson Setup</a>
+        </nav>
+      </section>
+
+      <section class="section compact intro-section">
+        <p>
+          The Jetson runs the ZED2i perception stack and publishes 3D human
+          detections. The robot-side experiment node transforms detections into
+          obstacle tracks, evaluates a density-based controller, and sends
+          Unitree high-level commands through the real-robot ROS interface. The
+          repository keeps the robot code, Jetson container notes, hardware
+          files, bag conversion tools, and GitHub Pages results in one place.
+        </p>
+      </section>
+
+      <section class="section" id="experiments">
+        <h2>Hardware Experiments</h2>
+        <p class="lead">
+          These trial videos come from the physical Go1 setup. They are kept in
+          the same dashboard-first style as the safe-control-density project so
+          robot behavior, onboard perception, local planning, and commands can
+          be inspected together.
+        </p>
+        <div class="video-stack social-results">
+          <article class="video-card wide">
+            <h3>Crowded navigation — Run 1</h3>
+            <video autoplay muted loop playsinline controls preload="metadata">
+              <source src="assets/videos/11-23_baseline.mp4" type="video/mp4">
+            </video>
+          </article>
+          <article class="video-card wide">
+            <h3>Crowded navigation — Run 2</h3>
+            <video autoplay muted loop playsinline controls preload="metadata">
+              <source src="assets/videos/11-48_baseline.mp4" type="video/mp4">
+            </video>
+          </article>
+          <article class="video-card wide">
+            <h3>Crowded navigation — Run 3</h3>
+            <video autoplay muted loop playsinline controls preload="metadata">
+              <source src="assets/videos/11-51_baseline.mp4" type="video/mp4">
+            </video>
+          </article>
+          <article class="video-card wide">
+            <h3>Crowded navigation — Run 4</h3>
+            <video autoplay muted loop playsinline controls preload="metadata">
+              <source src="assets/videos/12-05_baseline.mp4" type="video/mp4">
+            </video>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="system">
+        <h2>Robot System</h2>
+        <p class="lead">
+          The current system uses a ROS Noetic perception container on the
+          Jetson AGX Xavier and a Go1 control node that publishes high-level
+          forward-speed and yaw-rate commands.
+        </p>
+        <div class="method-grid three">
+          <article class="method-card">
+            <h3>1. ZED2i perception</h3>
+            <p>
+              The camera node uses the ZED SDK Python API for object detection,
+              tracking, and pose. It publishes human detections as
+              <code>autoware_msgs/DetectedObjectArray</code> on
+              <code>/detections</code>.
+            </p>
+          </article>
+          <article class="method-card">
+            <h3>2. Density planning</h3>
+            <p>
+              The experiment node converts detections into world-frame moving
+              obstacles, computes a density-field control direction, and records
+              synchronized marker and velocity bags for analysis.
+            </p>
+          </article>
+          <article class="method-card">
+            <h3>3. Go1 command tracking</h3>
+            <p>
+              The planner publishes Unitree <code>HighCmd</code> messages to
+              <code>/high_cmd</code>. The lower-level robot stack executes the
+              high-level velocity command on the physical quadruped.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section split hardware-section">
+        <div class="controller-copy">
+          <h2>Hardware Stack</h2>
+          <p>
+            The robot carries a ZED2i stereo camera, Jetson AGX Xavier, external
+            MAXOAK K2 battery, and a custom 3D-printed camera/battery mounting
+            setup. The Jetson runs JetPack 5.1.2 / L4T R35.4.1 with ZED SDK
+            5.1.2 and ROS Noetic inside the perception container.
+          </p>
+        </div>
+        <div class="method-grid stacked-methods hardware-cards">
+          <article class="method-card">
+            <h3>Robot</h3>
+            <p>Unitree Go1 quadruped with high-level command interface.</p>
+          </article>
+          <article class="method-card">
+            <h3>Perception and compute</h3>
+            <p>ZED2i camera on Jetson AGX Xavier, using ZED SDK object detection.</p>
+          </article>
+          <article class="method-card">
+            <h3>Power and mounting</h3>
+            <p>MAXOAK K2 185Wh battery and custom printed mounting hardware.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="reproduce">
+        <h2>Reproduce</h2>
+        <p class="lead">
+          The repository supports two Jetson container paths: load the private
+          saved lab image for exact recovery, or rebuild from the public
+          Stereolabs ZED Jetson base image and the checked-in Jetson nodes.
+        </p>
+        <div class="method-grid two">
+          <article class="method-card run-card">
+            <h3>Exact lab image restore</h3>
+            <pre><code>make docker-load
+make docker-run</code></pre>
+          </article>
+          <article class="method-card run-card">
+            <h3>Clean rebuild from source</h3>
+            <pre><code>make docker-build
+make docker-run</code></pre>
+          </article>
+          <article class="method-card run-card">
+            <h3>Run the Go1 experiment</h3>
+            <pre><code>roscore
+python3 ros_nodes/motion_plan_exp.py</code></pre>
+          </article>
+          <article class="method-card run-card">
+            <h3>Analyze saved bags</h3>
+            <pre><code>scripts/sync_jetson_bags.sh
+/usr/bin/python3 scripts/analyze_bag_runs.py</code></pre>
+          </article>
+        </div>
+        <nav class="actions" aria-label="Documentation links">
+          <a href="setup_jetson_agx.md">Jetson Setup</a>
+          <a href="running_experiments.md">Running Experiments</a>
+          <a href="data_analysis.md">Data Analysis</a>
+          <a href="hardware.md">Hardware</a>
+        </nav>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        Go1 Density Social Navigation. Raw ROS bags, Docker image backups, and
+        generated analysis outputs are intentionally excluded from Git.
+      </p>
+    </footer>
+  </body>
+</html>

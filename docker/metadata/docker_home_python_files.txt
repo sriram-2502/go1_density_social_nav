@@ -1,0 +1,5 @@
+/home/get_pos.py
+/home/create_robot_frame.py
+/home/object_detection.py
+/home/stream_video.py
+/home/camera_node.py

@@ -1,0 +1,55 @@
+### Python imports
+camera_node.py:1:import rospy
+camera_node.py:2:from sensor_msgs.msg import Image
+camera_node.py:3:from geometry_msgs.msg import PoseStamped
+camera_node.py:4:from autoware_msgs.msg import DetectedObject, DetectedObjectArray
+camera_node.py:5:import pyzed.sl as sl
+camera_node.py:6:import cv2
+camera_node.py:7:from cv_bridge import CvBridge
+camera_node.py:8:import numpy as np
+camera_node.py:9:import tf
+camera_node.py:10:import rosbag
+camera_node.py:11:from datetime import datetime
+object_detection.py:1:import rospy
+object_detection.py:2:from vision_msgs.msg import Detection3DArray, Detection3D
+object_detection.py:3:import pyzed.sl as sl
+object_detection.py:4:import cv2
+object_detection.py:5:import numpy as np
+stream_video.py:1:import rospy
+stream_video.py:2:from sensor_msgs.msg import Image
+stream_video.py:3:import pyzed.sl as sl
+stream_video.py:4:import cv2
+stream_video.py:5:from cv_bridge import CvBridge
+stream_video.py:6:import numpy as np
+get_pos.py:1:import rospy
+get_pos.py:2:from vision_msgs.msg import Detection3DArray, Detection3D
+get_pos.py:3:import pyzed.sl as sl
+get_pos.py:4:import cv2
+get_pos.py:5:import numpy as np
+create_robot_frame.py:1:import roslib
+create_robot_frame.py:2:import rospy    
+create_robot_frame.py:3:import tf
+
+### ROS topics / bag recording
+camera_node.py:4:from autoware_msgs.msg import DetectedObject, DetectedObjectArray
+camera_node.py:10:import rosbag
+camera_node.py:97:    pub_det = rospy.Publisher("detections", DetectedObjectArray, queue_size=10) 
+camera_node.py:101:    pub_pos = rospy.Publisher("camera_pose", PoseStamped, queue_size=10) 
+camera_node.py:105:    pub_img = rospy.Publisher("video", Image, queue_size=10)
+camera_node.py:119:    videoBag    = rosbag.Bag(f'bags/video_{timestamp}.bag', 'w')
+camera_node.py:120:    posBag      = rosbag.Bag(f'bags/pos{timestamp}.bag', 'w')
+camera_node.py:135:        detections = DetectedObjectArray()
+object_detection.py:49:    pub = rospy.Publisher("detections", Detection3DArray, queue_size=10)
+stream_video.py:23:    pub = rospy.Publisher("video", Image, queue_size=10)
+
+### Detector clues
+camera_node.py:5:import pyzed.sl as sl
+camera_node.py:36:    obj_param = sl.ObjectDetectionParameters()
+camera_node.py:48:    err = zed.enable_object_detection(obj_param)
+camera_node.py:129:            zed.retrieve_objects(objects)
+object_detection.py:3:import pyzed.sl as sl
+object_detection.py:23:    obj_param = sl.ObjectDetectionParameters()
+object_detection.py:35:    err = zed.enable_object_detection(obj_param)
+object_detection.py:54:        zed.retrieve_objects(objects)
+stream_video.py:3:import pyzed.sl as sl
+get_pos.py:3:import pyzed.sl as sl

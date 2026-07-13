@@ -1,0 +1,4 @@
+ROS_DISTRO=noetic
+ROS_PACKAGE_PATH=/opt/ros/noetic/share
+PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages
+LD_LIBRARY_PATH=/opt/ros/noetic/lib:/usr/local/cuda/lib64:
