@@ -5,7 +5,7 @@
 - Unitree Go1 quadruped
 - ZED2i stereo camera
 - Jetson AGX Xavier, older 2022-era unit
-- MAXOAK K2 185Wh / 50000mAh external battery pack
+- [MAXOAK K2 185Wh / 50000mAh external battery pack](https://maxoak.net/products/maxoak-k2-185wh-50000mah-power-bank), using the 20 V output to power the Jetson AGX Xavier
 
 ## Camera Mount
 

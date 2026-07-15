@@ -1,4 +1,4 @@
-# Go1 Density Social Navigation
+# Density-Based Safe Motion Planning for Social Navigation
 
 Density-field obstacle avoidance on a Unitree Go1 using a ZED2i camera, Jetson AGX Xavier, ROS Noetic, and high-level Unitree velocity commands.
 
@@ -16,7 +16,7 @@ This repository contains the robot-side experiment code, density-based navigatio
 - Camera: ZED2i
 - Onboard computer: Jetson AGX Xavier running JetPack 5.1.2 / L4T R35.4.1
 - Host PC: ROS Noetic workstation
-- Power: MAXOAK K2 185Wh / 50000mAh external battery pack
+- Power: [MAXOAK K2 185Wh / 50000mAh external battery pack](https://maxoak.net/products/maxoak-k2-185wh-50000mah-power-bank), using the 20 V output to power the Jetson AGX Xavier
 - Mounting: custom 3D-printed ZED camera mount, STL files to be added under `hardware/camera_mount_stl/`
 
 ## Software Stack

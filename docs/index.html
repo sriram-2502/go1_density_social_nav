@@ -4,13 +4,28 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Go1 density social navigation with ZED2i perception, Jetson AGX Xavier, ROS Noetic, and Unitree high-level commands.">
-    <title>Go1 Density Social Navigation</title>
+    <title>Density-Based Safe Motion Planning for Social Navigation</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
     <link rel="stylesheet" href="style.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"></script>
+    <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+          delimiters: [
+            { left: "$$", right: "$$", display: true },
+            { left: "\\(", right: "\\)", display: false }
+          ],
+          throwOnError: false
+        });
+      });
+    </script>
   </head>
   <body>
     <header class="topbar">
       <div class="topbar-inner">
-        <a class="brand" href="index.html">Go1 Density Social Navigation</a>
+        <a class="brand" href="index.html">Density-Based Safe Motion Planning for Social Navigation</a>
         <a class="topbar-action" href="https://github.com/sriram-2502/go1_density_social_nav">GitHub</a>
       </div>
     </header>
@@ -18,42 +33,250 @@
     <main>
       <section class="hero">
         <p class="eyebrow">Unitree Go1 · ZED2i · Jetson AGX Xavier · ROS Noetic</p>
-        <h1>GO1 DENSITY SOCIAL NAVIGATION</h1>
+        <h1>Density-Based Safe Motion Planning for Social Navigation</h1>
+        <nav class="actions" aria-label="Project sections">
+          <a href="#hardware">Hardware Setup</a>
+          <a href="#planner">Controller</a>
+          <a href="#experiments">Experiments</a>
+        </nav>
         <p class="subtitle">
-          A hardware implementation of density-field obstacle avoidance for a
-          Unitree Go1 navigating around moving pedestrians using onboard stereo
-          perception and high-level velocity commands.
+          Dynamic safe navigation on a Unitree Go1 using density functions: the
+          robot builds a density field from the goal and online ZED2i pedestrian
+          perception, then uses a feedback controller based on the density
+          gradient as the motion plan for safe high-level velocity commands.
         </p>
         <div class="authors">
           <span>Sriram S. K. S Narayanan</span>
-          <span>Clemson University</span>
+          <span>Philip Silva</span>
+          <span>Umesh Vaidya</span>
         </div>
-        <nav class="actions" aria-label="Project sections">
-          <a href="#system">System</a>
-          <a href="#experiments">Experiments</a>
-          <a href="#reproduce">Reproduce</a>
-          <a href="setup_jetson_agx.md">Jetson Setup</a>
-        </nav>
+        <p class="affiliation">Clemson University</p>
+        <div class="related-publications" aria-label="Related publications">
+          <h2>Related Publications</h2>
+          <ol>
+            <li>
+              Zheng, Andrew*, Sriram S. K. S. Narayanan*, and Umesh Vaidya.
+              <a href="https://arxiv.org/abs/2306.15830" target="_blank" rel="noopener noreferrer">Safe Navigation using Density Functions</a>.
+              <em>IEEE Robotics and Automation Letters</em> 8.12 (2023): 8502-8509.
+            </li>
+            <li>
+              Narayanan, Sriram S. K. S., Andrew Zheng, and Umesh Vaidya.
+              <a href="https://arxiv.org/abs/2312.09173" target="_blank" rel="noopener noreferrer">Safe Motion Planning for Quadruped Robots Using Density Functions</a>.
+              <em>2023 Ninth Indian Control Conference (ICC)</em>. IEEE, 2023.
+            </li>
+            <li>
+              Narayanan, Sriram S. K. S., Joseph Moyalan, Andrew Zheng, and Umesh Vaidya.
+              <a href="https://arxiv.org/abs/2411.12206" target="_blank" rel="noopener noreferrer">Density Functions for Dynamic Safe Navigation of Robotic Systems</a>.
+              <em>2025 American Control Conference (ACC)</em>. IEEE, 2025.
+            </li>
+          </ol>
+        </div>
       </section>
 
-      <section class="section compact intro-section">
-        <p>
-          The Jetson runs the ZED2i perception stack and publishes 3D human
-          detections. The robot-side experiment node transforms detections into
-          obstacle tracks, evaluates a density-based controller, and sends
-          Unitree high-level commands through the real-robot ROS interface. The
-          repository keeps the robot code, Jetson container notes, hardware
-          files, bag conversion tools, and GitHub Pages results in one place.
+      <section class="section compact featured-run">
+        <article class="video-card wide featured-video">
+          <video autoplay muted loop playsinline controls preload="metadata">
+            <source src="assets/videos/11-48_baseline.mp4" type="video/mp4">
+          </video>
+        </article>
+      </section>
+
+      <section class="section" id="planner">
+        <h2>Density-Based Safe Motion Planner</h2>
+        <p class="lead">
+          The planner builds a density function over the robot workspace from
+          the current human detections and the desired target. Pedestrians are
+          encoded as low-density unsafe regions, while the goal is encoded as a
+          high-density region. Following the positive gradient of this density
+          gives a safe motion plan: the Go1 moves toward the target while
+          naturally steering away from nearby people. The resulting planar
+          direction is converted into forward velocity and yaw-rate commands
+          for the robot to track. Because the planner is a feedback controller
+          based on the density-gradient evaluation, it is computationally light
+          and can be run faster when moving obstacles or hardware timing require
+          higher update rates.
         </p>
+        <p class="planner-reference">
+          For more details on safe controllers using density functions, refer
+          to the project page:
+          <a href="https://sriram-2502.github.io/safe_control_density/" target="_blank" rel="noopener noreferrer">Safe Navigation Using Density Functions</a>.
+        </p>
+        <div class="planner-stack">
+          <article class="method-card planner-card">
+            <h3>Unicycle model</h3>
+            <p>
+              The high-level planner represents the Go1 by its planar position
+              and heading, with forward speed \(v\) and yaw rate \(\omega\) as
+              the commanded inputs.
+            </p>
+            <div class="math-card">
+              $$
+              \dot{x}=v\cos\theta,\qquad
+              \dot{y}=v\sin\theta,\qquad
+              \dot{\theta}=\omega.
+              $$
+            </div>
+          </article>
+
+          <article class="method-card planner-card">
+            <h3>Density feedback</h3>
+            <p>
+              ZED detections are transformed into moving obstacle regions in
+              the robot workspace. These obstacles shape a density function
+              \(\rho(x,y)\) that decreases near unsafe regions and increases in
+              safe directions. The controller uses the positive density
+              gradient as the desired safe planar velocity, so each update is a
+              direct feedback computation rather than a trajectory optimization.
+            </p>
+            <div class="math-card">
+              $$
+              u_{\mathrm{safe}}(x,y)
+              = k_\rho\nabla \rho(x,y)
+              = \begin{bmatrix}u_x & u_y\end{bmatrix}^{\!T}.
+              $$
+            </div>
+          </article>
+
+          <article class="method-card planner-card">
+            <h3>Mapping to Go1 commands</h3>
+            <p>
+              The safe planar velocity is converted into the unicycle command
+              pair that the Unitree high-level interface can track: forward
+              velocity and yaw rate. The yaw command aligns the robot heading
+              with the safe density-gradient direction.
+            </p>
+            <div class="math-card">
+              $$
+              \begin{aligned}
+              \theta_d &= \operatorname{atan2}(u_y,u_x),\\
+              v &= \lVert u_{\mathrm{safe}}\rVert,\\
+              \omega &= k_\theta(\theta_d-\theta).
+              \end{aligned}
+              $$
+            </div>
+          </article>
+        </div>
+
+        <div class="density-demo-block">
+          <h3>Density Function Construction</h3>
+          <p>
+            The density function encodes both the moving human obstacles and the
+            robot target in a single smooth field. Human detections create
+            low-density regions around unsafe obstacle sets, while the target
+            term increases density near the desired goal. By following the
+            positive gradient of this function, the robot moves toward higher
+            density, stays away from nearby pedestrians, and produces safe
+            motion-planning commands for the Go1 to track.
+          </p>
+          <div class="interactive-panel">
+            <div class="control-panel" aria-label="Density plot controls">
+              <label>
+                Obstacle shape
+                <select id="density-shape">
+                  <option value="circle">Circle</option>
+                  <option value="diamond">Diamond</option>
+                  <option value="square">Rounded square</option>
+                  <option value="ellipse">Ellipse</option>
+                </select>
+              </label>
+              <label>
+                Safety radius <span id="density-r1-label">0.55</span>
+                <input id="density-r1" type="range" min="0.25" max="0.95" step="0.05" value="0.55">
+              </label>
+              <label>
+                Sensing radius <span id="density-r2-label">1.25</span>
+                <input id="density-r2" type="range" min="0.70" max="1.90" step="0.05" value="1.25">
+              </label>
+              <label>
+                Goal exponent alpha <span id="density-alpha-label">0.40</span>
+                <input id="density-alpha" type="range" min="0.15" max="1.20" step="0.05" value="0.40">
+              </label>
+            </div>
+            <div id="density-plot" class="density-plot" role="img" aria-label="Interactive 3D density surface"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section hardware-section" id="hardware">
+        <h2>Hardware Stack</h2>
+        <div class="hardware-visual-grid">
+          <figure class="hardware-photo-panel front-view">
+            <img src="assets/images/go1_front.png" alt="Front view of Unitree Go1 with ZED2i camera and custom mount">
+            <figcaption>Front View</figcaption>
+          </figure>
+
+          <figure class="hardware-photo-panel stack-view">
+            <img src="assets/images/go1_stack.png" alt="Hardware stack diagram showing Jetson AGX perception, host laptop planner, and Unitree Go1 command interface">
+          </figure>
+
+          <figure class="hardware-photo-panel back-view">
+            <img src="assets/images/go1_back.png" alt="Rear view of Unitree Go1 with Jetson AGX Xavier and battery pack">
+            <figcaption>Rear View</figcaption>
+          </figure>
+        </div>
+
+        <article class="method-card hardware-detail-card">
+          <h3>System Details</h3>
+          <div class="hardware-detail-list">
+            <p>
+              <strong>Platform.</strong> The physical platform is a Unitree Go1
+              carrying a ZED2i stereo camera and a Jetson AGX Xavier powered by
+              an external
+              <a href="https://maxoak.net/products/maxoak-k2-185wh-50000mah-power-bank" target="_blank" rel="noopener noreferrer">MAXOAK K2 battery</a>
+              through the battery's 20 V output.
+              The camera, compute, and battery are
+              mounted using custom printed hardware. The Jetson runs JetPack
+              5.1.2 / L4T R35.4.1 with ZED SDK 5.1.2 and ROS Noetic inside the
+              perception container. The Jetson software stack is deployed with
+              Docker so the ZED SDK, ROS Noetic dependencies, Autoware message
+              packages, and camera nodes can be reproduced on the AGX Xavier.
+            </p>
+            <p>
+              <strong>Distributed compute.</strong> The ZED perception stack runs
+              on the Jetson AGX Xavier, the density planner runs on the host
+              laptop, and the Unitree high-level bridge runs on the robot onboard
+              Jetson NX. These nodes exchange ROS messages over the Go1 Wi-Fi
+              network during experiments.
+            </p>
+            <p>
+              <strong>Perception.</strong> The ZED SDK provides
+              <a href="https://www.stereolabs.com/docs/positional-tracking/" target="_blank" rel="noopener noreferrer">positional tracking</a>
+              for camera visual odometry and
+              <a href="https://www.stereolabs.com/docs/object-detection/" target="_blank" rel="noopener noreferrer">3D object detection and tracking</a>
+              for pedestrians. <code>camera_node.py</code> publishes pedestrian
+              tracks, camera pose, and video frames at 10 Hz.
+            </p>
+            <p>
+              <strong>Control timing.</strong> <code>motion_plan_exp.py</code>
+              defaults to a 10 Hz planning loop. At each tick it consumes the
+              latest <code>/detections</code> and <code>/camera_pose</code>,
+              computes a density-gradient feedback command, and publishes
+              Unitree <code>HighCmd</code> to <code>/high_cmd</code>. The robot's
+              onboard low-level controller runs at 100 Hz and tracks the
+              high-level velocity command.
+            </p>
+            <p>
+              <strong>ROS interface.</strong> The perception container publishes
+              <code>autoware_msgs/DetectedObjectArray</code> on
+              <code>/detections</code>, <code>geometry_msgs/PoseStamped</code> on
+              <code>/camera_pose</code>, and image frames on <code>/video</code>.
+              The planner also publishes <code>/detections_markers</code> and
+              records synchronized marker and velocity bags for analysis.
+            </p>
+          </div>
+        </article>
       </section>
 
       <section class="section" id="experiments">
         <h2>Hardware Experiments</h2>
         <p class="lead">
-          These trial videos come from the physical Go1 setup. They are kept in
-          the same dashboard-first style as the safe-control-density project so
-          robot behavior, onboard perception, local planning, and commands can
-          be inspected together.
+          These in-the-wild trials were collected with the physical Go1 setup
+          during the
+          <a href="https://www.linkedin.com/posts/clemson-university-department-of-mechanical-engineering_last-friday-we-had-the-pleasure-of-hosting-activity-7460517207257649152-GadZ" target="_blank" rel="noopener noreferrer">Spring 2026 graduation reception ceremony</a>
+          in the Department of Mechanical Engineering at Clemson University. The videos show the
+          robot navigating around people in a real social setting, with onboard
+          perception, local planning, and high-level commands running on the
+          deployed hardware stack.
         </p>
         <div class="video-stack social-results">
           <article class="video-card wide">
@@ -83,111 +306,18 @@
         </div>
       </section>
 
-      <section class="section" id="system">
-        <h2>Robot System</h2>
-        <p class="lead">
-          The current system uses a ROS Noetic perception container on the
-          Jetson AGX Xavier and a Go1 control node that publishes high-level
-          forward-speed and yaw-rate commands.
-        </p>
-        <div class="method-grid three">
-          <article class="method-card">
-            <h3>1. ZED2i perception</h3>
-            <p>
-              The camera node uses the ZED SDK Python API for object detection,
-              tracking, and pose. It publishes human detections as
-              <code>autoware_msgs/DetectedObjectArray</code> on
-              <code>/detections</code>.
-            </p>
-          </article>
-          <article class="method-card">
-            <h3>2. Density planning</h3>
-            <p>
-              The experiment node converts detections into world-frame moving
-              obstacles, computes a density-field control direction, and records
-              synchronized marker and velocity bags for analysis.
-            </p>
-          </article>
-          <article class="method-card">
-            <h3>3. Go1 command tracking</h3>
-            <p>
-              The planner publishes Unitree <code>HighCmd</code> messages to
-              <code>/high_cmd</code>. The lower-level robot stack executes the
-              high-level velocity command on the physical quadruped.
-            </p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section split hardware-section">
-        <div class="controller-copy">
-          <h2>Hardware Stack</h2>
-          <p>
-            The robot carries a ZED2i stereo camera, Jetson AGX Xavier, external
-            MAXOAK K2 battery, and a custom 3D-printed camera/battery mounting
-            setup. The Jetson runs JetPack 5.1.2 / L4T R35.4.1 with ZED SDK
-            5.1.2 and ROS Noetic inside the perception container.
-          </p>
-        </div>
-        <div class="method-grid stacked-methods hardware-cards">
-          <article class="method-card">
-            <h3>Robot</h3>
-            <p>Unitree Go1 quadruped with high-level command interface.</p>
-          </article>
-          <article class="method-card">
-            <h3>Perception and compute</h3>
-            <p>ZED2i camera on Jetson AGX Xavier, using ZED SDK object detection.</p>
-          </article>
-          <article class="method-card">
-            <h3>Power and mounting</h3>
-            <p>MAXOAK K2 185Wh battery and custom printed mounting hardware.</p>
-          </article>
-        </div>
-      </section>
-
       <section class="section" id="reproduce">
         <h2>Reproduce</h2>
         <p class="lead">
-          The repository supports two Jetson container paths: load the private
-          saved lab image for exact recovery, or rebuild from the public
-          Stereolabs ZED Jetson base image and the checked-in Jetson nodes.
+          Full setup and run instructions are maintained in the GitHub README,
+          including host PC networking, Jetson Docker setup, ZED camera startup,
+          Unitree high-level bridge launch, and the density controller workflow.
         </p>
-        <div class="method-grid two">
-          <article class="method-card run-card">
-            <h3>Exact lab image restore</h3>
-            <pre><code>make docker-load
-make docker-run</code></pre>
-          </article>
-          <article class="method-card run-card">
-            <h3>Clean rebuild from source</h3>
-            <pre><code>make docker-build
-make docker-run</code></pre>
-          </article>
-          <article class="method-card run-card">
-            <h3>Run the Go1 experiment</h3>
-            <pre><code>roscore
-python3 ros_nodes/motion_plan_exp.py</code></pre>
-          </article>
-          <article class="method-card run-card">
-            <h3>Analyze saved bags</h3>
-            <pre><code>scripts/sync_jetson_bags.sh
-/usr/bin/python3 scripts/analyze_bag_runs.py</code></pre>
-          </article>
-        </div>
-        <nav class="actions" aria-label="Documentation links">
-          <a href="setup_jetson_agx.md">Jetson Setup</a>
-          <a href="running_experiments.md">Running Experiments</a>
-          <a href="data_analysis.md">Data Analysis</a>
-          <a href="hardware.md">Hardware</a>
+        <nav class="actions" aria-label="Reproduction links">
+          <a href="https://github.com/sriram-2502/go1_density_social_nav#readme" target="_blank" rel="noopener noreferrer">GitHub README</a>
         </nav>
       </section>
     </main>
-
-    <footer>
-      <p>
-        Go1 Density Social Navigation. Raw ROS bags, Docker image backups, and
-        generated analysis outputs are intentionally excluded from Git.
-      </p>
-    </footer>
+    <script src="assets/density-demo.js"></script>
   </body>
 </html>
