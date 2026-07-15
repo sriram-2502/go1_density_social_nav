@@ -55,7 +55,7 @@ It runs on the Jetson AGX Xavier with JetPack 5.1.2 / L4T R35.4.1 and ZED SDK 5.
 
 ### Option 1: Copy And Load The Saved Image
 
-Keep the private image tar out of Git. On the host PC, place it at:
+If you already have the image tar. On the host PC, place it at:
 
 ```text
 docker/image_backup/object_detection_jetson_agx_xavier_jp512_zed512.tar
