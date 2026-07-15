@@ -17,7 +17,7 @@ This repository contains the robot-side experiment code, density-based navigatio
 - Onboard computer: Jetson AGX Xavier running JetPack 5.1.2 / L4T R35.4.1
 - Host PC: ROS Noetic workstation
 - Power: [MAXOAK K2 185Wh / 50000mAh external battery pack](https://maxoak.net/products/maxoak-k2-185wh-50000mah-power-bank), using the 20 V output to power the Jetson AGX Xavier
-- Mounting: custom 3D-printed ZED camera mount, STL files to be added under `hardware/camera_mount_stl/`
+- Mounting: custom 3D-printed camera/compute hardware; saved Bambu print files are under `hardware/safe_gcode/`
 
 ## Software Stack
 
@@ -37,7 +37,7 @@ scripts/          bag sync, conversion, and analysis tools
 density_utils/    density-field controller and dynamics utilities
 docs/             GitHub Pages website and setup documentation
 docker/           Jetson container run scripts and environment notes
-hardware/         camera mount CAD/STL files and hardware notes
+hardware/         saved G-code print files and hardware notes
 analysis/         notes for plots and metrics
 trial_data/       local data staging; raw bags are ignored by Git
 ```

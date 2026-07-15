@@ -7,13 +7,15 @@
 - Jetson AGX Xavier, older 2022-era unit
 - [MAXOAK K2 185Wh / 50000mAh external battery pack](https://maxoak.net/products/maxoak-k2-185wh-50000mah-power-bank), using the 20 V output to power the Jetson AGX Xavier
 
-## Camera Mount
+## Saved G-code
 
-Place STL files for the custom ZED2i mount in:
+Saved Bambu Studio print files for the custom camera/compute mounting hardware are stored in:
 
 ```text
-hardware/camera_mount_stl/
+hardware/safe_gcode/
 ```
+
+These `.gcode.3mf` files are print-ready archives, not clean STL/CAD sources. Keep the original `.stl`, `.step`, CAD, or unsliced `.3mf` project files here if they become available.
 
 Add photos of the mounted camera and Jetson wiring under:
 

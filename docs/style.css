@@ -479,6 +479,48 @@ img {
   color: var(--ink);
 }
 
+.hardware-print-card {
+  margin-top: 18px;
+}
+
+.hardware-print-card > p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.hardware-print-card a {
+  font-weight: 700;
+}
+
+.hardware-print-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.hardware-print-grid figure {
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--panel);
+}
+
+.hardware-print-grid img {
+  aspect-ratio: 16 / 10;
+  object-fit: contain;
+  padding: 10px;
+}
+
+.hardware-print-grid figcaption {
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+  background: #fff;
+  font-size: 0.94rem;
+  font-weight: 800;
+}
+
 .gallery {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -515,7 +557,8 @@ pre {
   .gallery,
   .split,
   .interactive-panel,
-  .hardware-visual-grid {
+  .hardware-visual-grid,
+  .hardware-print-grid {
     grid-template-columns: 1fr;
   }
 
